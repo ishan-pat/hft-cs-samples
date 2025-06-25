@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [cpp, rust, go]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build & test C++ (ring buffer)
+      if: matrix.language == 'cpp'
+      run: |
+        sudo apt-get update -y && sudo apt-get install -y g++
+        g++ -std=c++17 -O2 lockfree_ringbuffer/test_ring_buffer.cpp -o rb && ./rb
+
+    - name: Build & test Rust (orderbook)
+      if: matrix.language == 'rust'
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: --manifest-path orderbook_engine/Cargo.toml --release
+
+    - name: Build Go UDP handler
+      if: matrix.language == 'go'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+    - if: matrix.language == 'go'
+      run: |
+        go vet ./...
+        go build -v ./udp_feed_handler

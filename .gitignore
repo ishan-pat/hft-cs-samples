@@ -1,0 +1,10 @@
+# C++
+*.o
+rb
+# Rust
+target/
+# Go
+bin/
+# general
+__pycache__/
+.DS_Store
